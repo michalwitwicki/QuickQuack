@@ -12,9 +12,11 @@ K_RANK = 'rank'
 K_NORM_RANK = 'time_normalized_rank'
 K_NORM_CONFIDENCE = 'normalized_confidence'
 K_TOTAL_PARTICIPATING_PLAYERS_COUNT = 'total_participating_players_count'
+K_BASE_SCORE = 'base_score'
+
 class QuickQuackDatabase:
     NUM_MAPS = 1
-    NUM_PLAYERS = 8
+    NUM_PLAYERS = 17 
     NORM_RANK_RANGE = (10, 1)
     NORM_OPPONETS_BEHIND_FACTOR_RANGE = (1, 2)
 
@@ -39,10 +41,10 @@ class QuickQuackDatabase:
     def add_player(self, player_id):
         if player_id not in self.players:
             self.players[player_id] = {
-                K_AVERAGE_RANK: 0,
-                K_MAP_PARTICIPATION_COUNT: 0
+                K_AVERAGE_RANK: None,
+                K_MAP_PARTICIPATION_COUNT: 0,
             }
-            self.players[player_id] = {K_MAP_PARTICIPATION_COUNT: 0}
+            # self.players[player_id] = {K_MAP_PARTICIPATION_COUNT: 0}
 
     def add_record(self, map_id, player_id, time):
         if map_id in self.maps and player_id in self.players:
@@ -59,7 +61,6 @@ class QuickQuackDatabase:
             if tmp == True:
                 self.metadata[K_TOTAL_PARTICIPATING_PLAYERS_COUNT] += 1
 
-
             if player_id not in self.records[map_id]:
                 self.players[player_id][K_MAP_PARTICIPATION_COUNT] += 1
                 self.maps[map_id][K_RECORDS_COUNT] += 1
@@ -69,12 +70,14 @@ class QuickQuackDatabase:
                     K_TIME: time,
                     K_RANK: None,
                     K_NORM_RANK: None,
-                    K_NORM_CONFIDENCE: None
+                    K_NORM_CONFIDENCE: None,
+                    K_BASE_SCORE: None
                 }
 
                 self.__update_map_ranks(map_id)
                 self.__update_map_norm_ranks(map_id)
-                self.__update_map_norm_opponents_behind(map_id)
+                self.__update_map_confidence(map_id)
+                self.__update_map_base_score(map_id)
                 self.__update_players_avg_ranks(map_id)
 
         else:
@@ -82,7 +85,6 @@ class QuickQuackDatabase:
 
     def get_player_average_rank(self, player_id):
         return self.players[player_id][K_AVERAGE_RANK] if player_id in self.players else 0
-
 
     def __update_map_ranks(self, map_id):
         # Update ranks based on sorted times
@@ -98,15 +100,13 @@ class QuickQuackDatabase:
         for pid, data in self.records[map_id].items():
             norm_rank = remap_to_range(
                 self.records[map_id][pid][K_TIME],
-                self.maps[map_id][K_BEST_TIME],
-                self.maps[map_id][K_WORST_TIME],
-                self.NORM_RANK_RANGE[0],
-                self.NORM_RANK_RANGE[1]
+                self.maps[map_id][K_BEST_TIME], self.maps[map_id][K_WORST_TIME],
+                self.NORM_RANK_RANGE[0], self.NORM_RANK_RANGE[1]
             )
 
             self.records[map_id][pid][K_NORM_RANK] = round(norm_rank, 3)
 
-    def __update_map_norm_opponents_behind(self, map_id):
+    def __update_map_confidence(self, map_id):
         map_player_count = self.maps[map_id][K_RECORDS_COUNT]
         for pid, data in self.records[map_id].items():
             opponets_behind_count = map_player_count - self.records[map_id][pid][K_RANK];
@@ -115,7 +115,14 @@ class QuickQuackDatabase:
                 0, self.metadata[K_TOTAL_PARTICIPATING_PLAYERS_COUNT] - 1,
                 self.NORM_OPPONETS_BEHIND_FACTOR_RANGE[0], self.NORM_OPPONETS_BEHIND_FACTOR_RANGE[1]
             )
+
             self.records[map_id][pid][K_NORM_CONFIDENCE] = norm_confidence
+
+    def __update_map_base_score(self, map_id):
+        for pid, data in self.records[map_id].items():
+            confidence = self.records[map_id][pid][K_NORM_CONFIDENCE]
+            normalized_rank = self.records[map_id][pid][K_NORM_RANK]
+            self.records[map_id][pid][K_BASE_SCORE] = normalized_rank * confidence
 
     def __update_players_avg_ranks(self, map_id):
         # Update players average rank
@@ -148,6 +155,20 @@ class QuickQuackDatabase:
             sorted_records = sorted(self.records[map_id].items(), key=lambda x: x[1][K_TIME])
             for player_id, data in sorted_records:
                 print(f"Player: {player_id}, Time: {data[K_TIME]}, Rank: {data[K_RANK]}")
+        else:
+            print(f"No records found for Map '{map_id}'")
+
+    def print_time_table(self, map_id):
+        if map_id in self.records:
+            sorted_records = sorted(self.records[map_id].items(), key=lambda x: x[1][K_TIME])
+
+            # Print header
+            print(f"{'Player ID': <15}{K_TIME: <10}{K_RANK: <10}{K_NORM_RANK: <25}{K_NORM_CONFIDENCE: <25}{K_BASE_SCORE: <15}")
+
+            # Print data rows
+            for player_id, data in sorted_records:
+                print(f"{player_id: <15}{data[K_TIME]: <10}{data[K_RANK]: <10}{data.get(K_NORM_RANK, ''): <25}{data.get(K_NORM_CONFIDENCE, ''): <25}{data.get(K_BASE_SCORE, ''): <15}")
+                # print(f"{player_id: <15}{data[K_TIME]: <10}{data[K_RANK]: <10}{data[K_NORM_RANK]: <25}{data[K_NORM_CONFIDENCE]: <25}{data[K_BASE_SCORE]: <15}")
         else:
             print(f"No records found for Map '{map_id}'")
 
@@ -211,6 +232,7 @@ def  remap_to_range(value, from_low, from_high, to_low, to_high):
 
 if __name__ == "__main__":
     game_db = QuickQuackDatabase()
+    game_db.print_time_table("Map1")
 
     # game_db = QuickQuackDatabase(auto_populate=False)
     # game_db.add_player("P1")
@@ -233,10 +255,5 @@ if __name__ == "__main__":
 
     # game_db.add_record("M3", "P1", 12)
     # game_db.add_record("M3", "P2", 10)
-
-
-
-
-
 
     game_db.dump_to_json("db.json")
