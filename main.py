@@ -304,7 +304,7 @@ class QuickQuackDatabase:
             print(f"{data[0]}: {data[1]}")
 
     def print_leader_board(self):
-
+        print(f"Leader board:")
         sorted_players = sorted(self.players.items(), key=lambda x: x[1][K_FINAL_SCORE], reverse=True)
 
         # Print header
@@ -342,8 +342,8 @@ class QuickQuackDatabase:
                 SIM_MAP_WORST_TIME: round(max(time1, time2), 3)
             }
 
-        pretty = json.dumps(maps_simulation_data, indent=4)
-        print(pretty)
+        # pretty = json.dumps(maps_simulation_data, indent=4)
+        # print(pretty)
 
         # Add simulation data for players
         SIM_PLAYER_SKILL = 'player_skill' # expressed as the percentile of opponents that a given player will defeat
@@ -358,8 +358,8 @@ class QuickQuackDatabase:
                 SIM_NUM_TRIES: num_tries
             }
 
-        pretty = json.dumps(players_simulation_data, indent=4)
-        print(pretty)
+        # pretty = json.dumps(players_simulation_data, indent=4)
+        # print(pretty)
 
         # Add records
         for m_id in self.maps.keys():
@@ -372,9 +372,18 @@ class QuickQuackDatabase:
                                 maps_simulation_data[m_id][SIM_MAP_WORST_TIME],
                                 maps_simulation_data[m_id][SIM_MAP_BEST_TIME]
                                 )
-                        print(f"time: {time}")
+                        # print(f"time: {time}")
                         self.add_record(m_id, p_id, round(time, 3))
                         break
+
+        # Print table with expected results
+        sorted_players = sorted(players_simulation_data.items(), key=lambda x: x[1][SIM_PLAYER_SKILL], reverse=True)
+        print(f"Expected leader board")
+        # Print header
+        print(f"{'Player ID': <11}{SIM_PLAYER_SKILL: <25}{SIM_NUM_TRIES: <10}")
+        # Print data rows
+        for player_id, data in sorted_players:
+            print(f"{player_id: <11}{data[SIM_PLAYER_SKILL]: <25}{data[SIM_NUM_TRIES]: <10}")
 
     def dump_to_json(self, filename):
         data_to_dump = {
@@ -407,7 +416,7 @@ def  remap_to_range(value, from_low, from_high, to_low, to_high):
     return remapped_value
 
 if __name__ == "__main__":
-    game_db = QuickQuackDatabase(num_maps=1, num_players=1)
+    game_db = QuickQuackDatabase(num_maps=10, num_players=10)
     # game_db = QuickQuackDatabase(num_maps=3, num_players=2)
     # game_db.print_map_time_table("Map1")
     # game_db.print_player_time_table("Player1")
