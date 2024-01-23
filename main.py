@@ -328,12 +328,41 @@ class QuickQuackDatabase:
             player_id = f"Player{i}"
             self.add_player(player_id)
 
-        # Add random records
-        for map_id in self.maps.keys():
-            for player_id in self.players.keys():
+        # Add simulation data for maps
+        SIM_MAP_POPULARITY = 'popularity'
+        SIM_MAP_BEST_TIME = 'best_time'
+        SIM_MAP_WORST_TIME = 'worst_time'
+        maps_simulation_data = {}
+        for m_id in self.maps:
+            time1 = random.uniform(3, 100)
+            time2 = random.uniform(3, 100)
+            maps_simulation_data[m_id] = {
+                SIM_MAP_POPULARITY: round(random.random(), 3),
+                SIM_MAP_BEST_TIME: round(min(time1, time2), 3),
+                SIM_MAP_WORST_TIME: round(max(time1, time2), 3)
+            }
+
+        pretty = json.dumps(maps_simulation_data, indent=4)
+        print(pretty)
+
+        # Add simulation data for players
+        SIM_PLAYER_SKILL = 'player_skill' # expressed as the percentile of opponents that a given player will defeat
+        players_simulation_data = {}
+        for p_id in self.players:
+            players_simulation_data[p_id] = {
+                SIM_PLAYER_SKILL: round(random.random(), 3),
+            }
+
+        pretty = json.dumps(players_simulation_data, indent=4)
+        print(pretty)
+
+        # retrn
+        # Add records
+        for m_id in self.maps.keys():
+            for p_id in self.players.keys():
                 if random.random() < 0.6: # Randomly decide if the player has a record on the map
                     time = round(random.uniform(1, 100), 3)
-                    self.add_record(map_id, player_id, time)
+                    self.add_record(m_id, p_id, time)
 
     def dump_to_json(self, filename):
         data_to_dump = {
@@ -370,7 +399,7 @@ if __name__ == "__main__":
     # game_db = QuickQuackDatabase(num_maps=3, num_players=2)
     # game_db.print_map_time_table("Map1")
     # game_db.print_player_time_table("Player1")
-    game_db.print_leader_board()
+    # game_db.print_leader_board()
 
     # game_db = QuickQuackDatabase(auto_populate=False)
     # game_db.add_map("M1")
