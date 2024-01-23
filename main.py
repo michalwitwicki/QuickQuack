@@ -347,22 +347,34 @@ class QuickQuackDatabase:
 
         # Add simulation data for players
         SIM_PLAYER_SKILL = 'player_skill' # expressed as the percentile of opponents that a given player will defeat
+        SIM_NUM_TRIES = 'num_tries'
+        SIM_NUM_TRIES_MAX = 5
         players_simulation_data = {}
         for p_id in self.players:
+            player_skill = round(random.random(), 3)
+            num_tries = int(player_skill * SIM_NUM_TRIES_MAX) + 1
             players_simulation_data[p_id] = {
-                SIM_PLAYER_SKILL: round(random.random(), 3),
+                SIM_PLAYER_SKILL: player_skill,
+                SIM_NUM_TRIES: num_tries
             }
 
         pretty = json.dumps(players_simulation_data, indent=4)
         print(pretty)
 
-        # retrn
         # Add records
         for m_id in self.maps.keys():
             for p_id in self.players.keys():
-                if random.random() < 0.6: # Randomly decide if the player has a record on the map
-                    time = round(random.uniform(1, 100), 3)
-                    self.add_record(m_id, p_id, time)
+                for i in range(players_simulation_data[p_id][SIM_NUM_TRIES]):
+                    if maps_simulation_data[m_id][SIM_MAP_POPULARITY] >= random.random():
+                        time = remap_to_range(
+                                players_simulation_data[p_id][SIM_PLAYER_SKILL],
+                                0, 1,
+                                maps_simulation_data[m_id][SIM_MAP_WORST_TIME],
+                                maps_simulation_data[m_id][SIM_MAP_BEST_TIME]
+                                )
+                        print(f"time: {time}")
+                        self.add_record(m_id, p_id, round(time, 3))
+                        break
 
     def dump_to_json(self, filename):
         data_to_dump = {
@@ -395,7 +407,7 @@ def  remap_to_range(value, from_low, from_high, to_low, to_high):
     return remapped_value
 
 if __name__ == "__main__":
-    game_db = QuickQuackDatabase(num_maps=5, num_players=5)
+    game_db = QuickQuackDatabase(num_maps=1, num_players=1)
     # game_db = QuickQuackDatabase(num_maps=3, num_players=2)
     # game_db.print_map_time_table("Map1")
     # game_db.print_player_time_table("Player1")
