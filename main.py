@@ -240,8 +240,7 @@ class QuickQuackDatabase:
                 avg_confidence_factor = round(total_confidence_factor / total_maps, 3)
                 avg_base_score = round(total_base_score / total_maps, 3)
                 avg_attendance_score = round(total_attendance_score / total_maps, 3)
-                final_score = avg_base_score + avg_attendance_score
-
+                final_score = round(avg_base_score + avg_attendance_score, 3)
 
             self.players[p_id][K_AVG_CONFIDENCE_FACTOR] = avg_confidence_factor
             self.players[p_id][K_AVG_BASE_SCORE] = avg_base_score
@@ -270,6 +269,10 @@ class QuickQuackDatabase:
         for player_id, data in sorted_records:
             print(f"{player_id: <15}{data[K_TIME]: <10}{data[K_RANK]: <10}{data[K_NORM_RANK]: <25}{data[K_CONFIDENCE_FACTOR]: <25}{data[K_BASE_SCORE]: <15}{data[K_ATTENDANCE_SCORE]: <15}")
 
+        print(f"\nStats for map '{map_id}':")
+        for data in self.maps[map_id].items():
+            print(f"{data[0]}: {data[1]}")
+
     def print_player_time_table(self, player_id):
         print(f"Records for player '{player_id}':")
         player_records = [(map_id,
@@ -282,32 +285,37 @@ class QuickQuackDatabase:
                            )
                            for map_id in self.records.keys() if player_id in self.records[map_id]]
 
-        if player_records:
-            sorted_player_records = sorted(player_records, key=lambda x: x[2])
-
-            # Print header
-            print(f"{'Map ID': <15}{K_TIME: <10}{K_RANK: <10}{K_NORM_RANK: <25}{K_CONFIDENCE_FACTOR: <25}{K_BASE_SCORE: <15}{K_ATTENDANCE_SCORE: <15}")
-
-            # Print data rows
-            for data in sorted_player_records:
-                print(f"{data[0]: <15}{data[1]: <10}{data[2]: <10}{data[3]: <25}{data[4]: <25}{data[5]: <15}{data[6]: <15}")
-
-            print(f"Stats for player '{player_id}':")
-            for data in self.players[player_id].items():
-                print(f"{data[0]}: {data[1]}")
-
-        else:
+        if not player_records:
             print(f"No records found for Player '{player_id}'")
-
-    def print_player_stats(self, player_id):
-        if player_id not in self.players:
-            print(f"Player '{player_id}' not in database")
             return
 
-        print(f"Stats for player '{player_id}':")
+        sorted_player_records = sorted(player_records, key=lambda x: x[2])
+
+        # Print header
+        print(f"{'Map ID': <15}{K_TIME: <10}{K_RANK: <10}{K_NORM_RANK: <25}"
+              f"{K_CONFIDENCE_FACTOR: <25}{K_BASE_SCORE: <15}{K_ATTENDANCE_SCORE: <15}")
+
+        # Print data rows
+        for data in sorted_player_records:
+            print(f"{data[0]: <15}{data[1]: <10}{data[2]: <10}{data[3]: <25}{data[4]: <25}{data[5]: <15}{data[6]: <15}")
+
+        print(f"\nStats for player '{player_id}':")
         for data in self.players[player_id].items():
             print(f"{data[0]}: {data[1]}")
 
+    def print_leader_board(self):
+
+        sorted_players = sorted(self.players.items(), key=lambda x: x[1][K_FINAL_SCORE], reverse=True)
+
+        # Print header
+        print(f"{'Player ID': <11}{K_MAP_PARTICIPATION_COUNT: <25}{K_AVG_RANK: <10}{K_AVG_NORM_RANK: <15}"
+              f"{K_AVG_CONFIDENCE_FACTOR: <23}{K_AVG_BASE_SCORE: <16}{K_AVG_ATTENDANCE_SCORE: <22}{K_FINAL_SCORE: <15}")
+
+        # Print data rows
+        for player_id, data in sorted_players:
+            print(f"{player_id: <11}{data[K_MAP_PARTICIPATION_COUNT]: <25}{data[K_AVG_RANK]: <10}"
+                  f"{data[K_AVG_NORM_RANK]: <15}{data[K_AVG_CONFIDENCE_FACTOR]: <23}"
+                  f"{data[K_AVG_BASE_SCORE]: <16}{data[K_AVG_ATTENDANCE_SCORE]: <22}{data[K_FINAL_SCORE]: <15}")
 
     def populate_database(self, num_maps, num_players):
         # Add maps
@@ -358,11 +366,11 @@ def  remap_to_range(value, from_low, from_high, to_low, to_high):
     return remapped_value
 
 if __name__ == "__main__":
-    game_db = QuickQuackDatabase(num_maps=10, num_players=50)
+    game_db = QuickQuackDatabase(num_maps=5, num_players=5)
     # game_db = QuickQuackDatabase(num_maps=3, num_players=2)
     # game_db.print_map_time_table("Map1")
-    game_db.print_player_time_table("Player1")
-    # game_db.print_player_stats("Player1")
+    # game_db.print_player_time_table("Player1")
+    game_db.print_leader_board()
 
     # game_db = QuickQuackDatabase(auto_populate=False)
     # game_db.add_map("M1")
