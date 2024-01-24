@@ -5,15 +5,16 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 * Many time-based games feature a large number of maps, ranging from hundreds to thousands. This can result in situations where a map lacks sufficient "saturation" to provide a balanced rating for players who complete it. Factors contributing to this lack of "saturation" may include a low player base, the map's lack of popularity, or its high level of difficulty, making successful completion a significant challenge.
 * Time-based games typically operate as "infinite games," allowing continual access to maps throughout the game's lifespan and enabling ongoing alterations to leaderboards.
 
-# Key Principles
+# QuickQuack Key Principles
+* The rating system should be designed around seasons and a predefined map pool for each respective season (no seasonal, long-term approach is also possible, check below).
 * Seasons should have a relatively short duration, allowing even casual players to actively participate from start to finish (e.g., 2 weeks).
 * The map pool should encompass maps that test a variety of skills. Additionally, the pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., the number of days in a season multiplied by 1.5).
-* To receive a rating for the current season, players must successfully complete a specified number of maps from the pool within a designated time frame (e.g., the number of maps in the pool multiplied by 0.5). Only times recorded during the specific period should be considered.
+* To receive a rating for the current season, players must successfully complete a specified number of maps from the pool within a designated time frame (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
 * To maximize map saturation, the rating system should encourage players to play maps that have a low record count.
 * Players have their own preferences in map styles, and the system should not grant more points solely based on completing a higher quantity of maps. Players should be able to win the season by participating in only the required number of maps.
 * For the season's final rating to be compatible with any future seasons, it is crucial to normalize the number of players, maps, and records.
 
-# Calculation overview
+# Calculation Overview
 Main components used to calculate final score:
 * **normalized_rank**: player’s time normalized from `<best_map_time, worst_map_time>` to `<1000, 0>`, calculated per player, per map
 * **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season>` to `<0, 1>`, calculated per player, per map
@@ -36,7 +37,9 @@ There is also a `populate_database` method designed to simulate "real-world" dat
 
 This approach allows for the comparison of "expected results" with the "actual results" produced by QuickQuack. Following several tests, I can confirmed that QuickQuack is indeed working and yields the intended outcomes. 😄
 
-# Additional Ideas:
+To test that script simply run `python main.py`.
+
+# Additional Ideas
 * The map pool selection can be customized, either handpicked, semi-random, or chosen through community votes. It could also include new maps specifically released for a particular season.
 * At the conclusion of each season, players could be awarded "badges" for achieving specific milestones, such as securing 1st, 2nd, and 3rd place on individual maps and on final leaderboard. An additional achievement might be earned for recording a time on every map in the pool. Many other achievements could be explored. The key aspect is visibility of those badges, they should be displayed in a player's profile as attractive graphical icons, serving as strong motivation to participate in the season.
 * Historical season results should be easily accessible, everyone loves statistics!
