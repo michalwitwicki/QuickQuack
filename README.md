@@ -33,7 +33,9 @@ This approach allows for the comparison of "expected results" with the "actual r
 * Historical season results should be easily accessible, everyone loves statistics!
 
 # How to make it work outside defined seasons
-WIP
+In order to implement the system outside defined seasons, a straightforward approach is to assign each player their individual map pool, consisting of the X number of maps where the player performed the best. However, it's important to note that calculating skill ratings across thousands of maps, over an infinite time period, and with numerous inactive players will result in less accuracy compared to restricting the system to specific defined values.
+
+I would recommend avoiding the use of just one long-term rating. Perhaps a good solution would be to have two ratings: the first being short-term and accurate, and the second being long-term and approximate. The long-term rating can be calculated using the above approach or simply be the average of all (or just the latest) short-term ratings.
 
 # License
 [MIT](License)
