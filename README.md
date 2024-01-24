@@ -17,7 +17,7 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 # Calculation Overview
 Main components used to calculate final score:
 * **normalized_rank**: player’s time normalized from `<best_map_time, worst_map_time>` to `<1000, 0>`, calculated per player, per map
-* **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season>` to `<0, 1>`, calculated per player, per map
+* **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season> - 1` to `<0, 1>`, calculated per player, per map
 * **base_score**: `normalized_rank * confidence_factor`, calculated per player, per map
 * **attendance_factor**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1, 0>`, calculated per map
 * **attendance_score**: `attendance_factor` normalized from `<1, 0>` to `<1000, 0>`, calculated per player, per map
