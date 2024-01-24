@@ -13,6 +13,7 @@ K_RANK = 'rank'
 K_NORM_RANK = 'normalized_rank'
 K_CONFIDENCE_FACTOR = 'confidence_factor'
 K_TOTAL_PARTICIPATING_PLAYERS_COUNT = 'total_participating_players_count'
+K_TOTAL_MAP_COUNT = 'total_map_count'
 K_BASE_SCORE = 'base_score'
 K_MAP_ATTENDANCE_FACTOR = 'attendance_factor'
 K_ATTENDANCE_SCORE = 'attendance_score'
@@ -22,14 +23,18 @@ K_AVG_ATTENDANCE_SCORE = 'avg_attendance_score'
 K_FINAL_SCORE = 'final_score'
 
 class QuickQuackDatabase:
-    NORM_RANK_RANGE = (10, 1)
+    NORM_RANK_RANGE = (1000, 0)
     CONFIDENCE_FACTOR_RANGE = (0, 1)
     MAP_ATTENDANCE_FACTOR_RANGE = (1, 0)
-    MAX_ATTENDANCE_BONUS = 10
+    MAP_ATTENDANCE_BONUS_RANGE = (1000, 0)
+    MIN_PCT_MAP_PARTICIPATION = 0.5 # min percentage map participation to receive rank for a season
 
     def __init__(self, auto_populate=True, num_maps=3, num_players=5):
 
-        self.metadata = {K_TOTAL_PARTICIPATING_PLAYERS_COUNT: 0}
+        self.metadata = {
+            K_TOTAL_PARTICIPATING_PLAYERS_COUNT: 0,
+            K_TOTAL_MAP_COUNT: 0
+        }
         self.maps = {} # "maps" dictionary is THE map pool for a season
         self.players = {}
         self.records = {}
@@ -44,6 +49,8 @@ class QuickQuackDatabase:
                 K_WORST_TIME: None,
                 K_MAP_ATTENDANCE_FACTOR: None
             }
+
+            self.metadata[K_TOTAL_MAP_COUNT] += 1
 
     def add_player(self, player_id):
         if player_id not in self.players:
@@ -90,10 +97,7 @@ class QuickQuackDatabase:
 
             # Update stats depending on attendancy factor
             if attendance_factor_changed:
-                # TODO: all of those methods shoube be merged into one for optimalization reasons
-                self.__update_attendance_bonuses()
-                self.__update_confidences()
-                self.__update_base_scores()
+                self.__update_attendance_dependent_stats()
 
             # Update players stats if something important changed
             if update_players_stats:
@@ -145,13 +149,6 @@ class QuickQuackDatabase:
 
             self.maps[m_id][K_MAP_ATTENDANCE_FACTOR] = round(attendance_factor, 3)
 
-    def __update_attendance_bonuses(self):
-        # Update attendance bonus everywhere!
-        for m_id, records in self.records.items():
-            attendance_factor = self.maps[m_id][K_MAP_ATTENDANCE_FACTOR]
-            for p_id, data in records.items():
-                self.records[m_id][p_id][K_ATTENDANCE_SCORE] = round(attendance_factor * self.MAX_ATTENDANCE_BONUS, 3)
-
     def __update_ranks(self, map_id):
         # Update ranks based on sorted times
         sorted_records = sorted(self.records[map_id].items(), key=lambda x: x[1][K_TIME])
@@ -172,10 +169,22 @@ class QuickQuackDatabase:
 
             self.records[map_id][p_id][K_NORM_RANK] = round(norm_rank, 3)
 
-    def __update_confidences(self):
+    def __update_attendance_dependent_stats(self):
+
         for m_id, records in self.records.items():
+            attendance_factor = self.maps[m_id][K_MAP_ATTENDANCE_FACTOR]
             map_player_count = self.maps[m_id][K_RECORDS_COUNT]
+
             for p_id, data in records.items():
+                # Update attendance bonuses
+                attendance_score = remap_to_range(attendance_factor,
+                                                  self.MAP_ATTENDANCE_FACTOR_RANGE[0], self.MAP_ATTENDANCE_FACTOR_RANGE[1],
+                                                  self.MAP_ATTENDANCE_BONUS_RANGE[0], self.MAP_ATTENDANCE_BONUS_RANGE[1])
+
+
+                self.records[m_id][p_id][K_ATTENDANCE_SCORE] = attendance_score
+
+                # Update condfidences
                 opponets_behind_count = map_player_count - self.records[m_id][p_id][K_RANK];
 
                 if opponets_behind_count == 0:
@@ -189,9 +198,7 @@ class QuickQuackDatabase:
 
                 self.records[m_id][p_id][K_CONFIDENCE_FACTOR] = round(norm_confidence, 3)
 
-    def __update_base_scores(self):
-        for m_id, records in self.records.items():
-            for p_id, data in records.items():
+                # Update base score
                 confidence = self.records[m_id][p_id][K_CONFIDENCE_FACTOR]
                 normalized_rank = self.records[m_id][p_id][K_NORM_RANK]
                 self.records[m_id][p_id][K_BASE_SCORE] = round(normalized_rank * confidence, 3)
@@ -240,7 +247,12 @@ class QuickQuackDatabase:
                 avg_confidence_factor = round(total_confidence_factor / total_maps, 3)
                 avg_base_score = round(total_base_score / total_maps, 3)
                 avg_attendance_score = round(total_attendance_score / total_maps, 3)
-                final_score = round(avg_base_score + avg_attendance_score, 3)
+
+                # Check if player completed minimal number of maps
+                if self.players[p_id][K_MAP_PARTICIPATION_COUNT] >= self.MIN_PCT_MAP_PARTICIPATION * self.metadata[K_TOTAL_MAP_COUNT]:
+                    final_score = round(avg_base_score + avg_attendance_score, 3)
+                else:
+                    final_score = 0
 
             self.players[p_id][K_AVG_CONFIDENCE_FACTOR] = avg_confidence_factor
             self.players[p_id][K_AVG_BASE_SCORE] = avg_base_score
@@ -304,16 +316,16 @@ class QuickQuackDatabase:
             print(f"{data[0]}: {data[1]}")
 
     def print_leader_board(self):
-        print(f"Leader board:")
+        print(f"\nLeader board:")
         sorted_players = sorted(self.players.items(), key=lambda x: x[1][K_FINAL_SCORE], reverse=True)
 
         # Print header
-        print(f"{'Player ID': <11}{K_MAP_PARTICIPATION_COUNT: <25}{K_AVG_RANK: <10}{K_AVG_NORM_RANK: <15}"
+        print(f"{'ID': <4}  {'Player ID': <11}{K_MAP_PARTICIPATION_COUNT: <25}{K_AVG_RANK: <10}{K_AVG_NORM_RANK: <15}"
               f"{K_AVG_CONFIDENCE_FACTOR: <23}{K_AVG_BASE_SCORE: <16}{K_AVG_ATTENDANCE_SCORE: <22}{K_FINAL_SCORE: <15}")
 
         # Print data rows
-        for player_id, data in sorted_players:
-            print(f"{player_id: <11}{data[K_MAP_PARTICIPATION_COUNT]: <25}{data[K_AVG_RANK]: <10}"
+        for i, (player_id, data) in enumerate(sorted_players):
+            print(f"{i+1: <4}  {player_id: <11}{data[K_MAP_PARTICIPATION_COUNT]: <25}{data[K_AVG_RANK]: <10}"
                   f"{data[K_AVG_NORM_RANK]: <15}{data[K_AVG_CONFIDENCE_FACTOR]: <23}"
                   f"{data[K_AVG_BASE_SCORE]: <16}{data[K_AVG_ATTENDANCE_SCORE]: <22}{data[K_FINAL_SCORE]: <15}")
 
@@ -342,48 +354,51 @@ class QuickQuackDatabase:
                 SIM_MAP_WORST_TIME: round(max(time1, time2), 3)
             }
 
-        # pretty = json.dumps(maps_simulation_data, indent=4)
-        # print(pretty)
+        # print(json.dumps(maps_simulation_data, indent=4))
 
         # Add simulation data for players
         SIM_PLAYER_SKILL = 'player_skill' # expressed as the percentile of opponents that a given player will defeat
+        SIM_PLAYER_SKILL_UNCERTAINTY = 'player_skill_uncertainty'
         SIM_NUM_TRIES = 'num_tries'
-        SIM_NUM_TRIES_MAX = 5
+        SIM_NUM_TRIES_MAX = 3
         players_simulation_data = {}
         for p_id in self.players:
             player_skill = round(random.random(), 3)
+            player_skill_uncertainty = round(random.uniform(0, 0.2), 3)
             num_tries = int(player_skill * SIM_NUM_TRIES_MAX) + 1
             players_simulation_data[p_id] = {
                 SIM_PLAYER_SKILL: player_skill,
+                SIM_PLAYER_SKILL_UNCERTAINTY: player_skill_uncertainty,
                 SIM_NUM_TRIES: num_tries
             }
 
-        # pretty = json.dumps(players_simulation_data, indent=4)
-        # print(pretty)
+        # print(json.dumps(players_simulation_data, indent=4))
 
         # Add records
         for m_id in self.maps.keys():
             for p_id in self.players.keys():
                 for i in range(players_simulation_data[p_id][SIM_NUM_TRIES]):
                     if maps_simulation_data[m_id][SIM_MAP_POPULARITY] >= random.random():
+                        skill = players_simulation_data[p_id][SIM_PLAYER_SKILL]
+                        skill_uncertainty = players_simulation_data[p_id][SIM_PLAYER_SKILL]
+                        current_skill = random.gauss(skill, skill_uncertainty)
                         time = remap_to_range(
-                                players_simulation_data[p_id][SIM_PLAYER_SKILL],
+                                skill,
                                 0, 1,
                                 maps_simulation_data[m_id][SIM_MAP_WORST_TIME],
                                 maps_simulation_data[m_id][SIM_MAP_BEST_TIME]
                                 )
-                        # print(f"time: {time}")
                         self.add_record(m_id, p_id, round(time, 3))
                         break
 
         # Print table with expected results
         sorted_players = sorted(players_simulation_data.items(), key=lambda x: x[1][SIM_PLAYER_SKILL], reverse=True)
-        print(f"Expected leader board")
+        print(f"\nExpected leader board")
         # Print header
-        print(f"{'Player ID': <11}{SIM_PLAYER_SKILL: <25}{SIM_NUM_TRIES: <10}")
+        print(f"{'ID': <4}  {'Player ID': <11}{SIM_PLAYER_SKILL: <25}{SIM_NUM_TRIES: <10}")
         # Print data rows
-        for player_id, data in sorted_players:
-            print(f"{player_id: <11}{data[SIM_PLAYER_SKILL]: <25}{data[SIM_NUM_TRIES]: <10}")
+        for i, (player_id, data) in enumerate(sorted_players):
+            print(f"{i+1: <4}  {player_id: <11}{data[SIM_PLAYER_SKILL]: <25}{data[SIM_NUM_TRIES]: <10}")
 
     def dump_to_json(self, filename):
         data_to_dump = {
@@ -416,40 +431,18 @@ def  remap_to_range(value, from_low, from_high, to_low, to_high):
     return remapped_value
 
 if __name__ == "__main__":
-    game_db = QuickQuackDatabase(num_maps=10, num_players=10)
-    # game_db = QuickQuackDatabase(num_maps=3, num_players=2)
+    game_db = QuickQuackDatabase(num_maps=3, num_players=5)
     # game_db.print_map_time_table("Map1")
     # game_db.print_player_time_table("Player1")
-    # game_db.print_leader_board()
+    game_db.print_leader_board()
 
     # game_db = QuickQuackDatabase(auto_populate=False)
     # game_db.add_map("M1")
     # game_db.add_map("M2")
     # game_db.add_player("P1")
     # game_db.add_player("P2")
-    # game_db.add_player("P3")
-    # game_db.add_player("P4")
-    # game_db.add_player("P5")
-    # game_db.add_player("P6")
-    # game_db.add_player("P7")
-    # game_db.add_player("P8")
-    # game_db.add_player("P9")
-    # game_db.add_player("P10")
-
     # game_db.add_record("M1", "P1", 10)
     # game_db.add_record("M1", "P2", 20)
-    # game_db.add_record("M1", "P3", 9)
-    # game_db.add_record("M1", "P4", 30)
-    # game_db.add_record("M1", "P5", 1)
-    # game_db.add_record("M1", "P6", 10)
-    # game_db.add_record("M1", "P7", 20)
-    # game_db.add_record("M1", "P8", 30)
-    # # game_db.add_record("M1", "P9", 9)
-    # # game_db.add_record("M1", "P10", 123)
-
-    # game_db.add_record("M2", "P9", 20)
-    # game_db.add_record("M2", "P10", 10)
-
-
+    # game_db.add_record("M2", "P1", 10)
 
     game_db.dump_to_json("db.json")
