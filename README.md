@@ -10,10 +10,19 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 * The map pool should encompass maps that test a variety of skills. Additionally, the pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., the number of days in a season multiplied by 1.5).
 * To receive a rating for the current season, players must successfully complete a specified number of maps from the pool within a designated time frame (e.g., the number of maps in the pool multiplied by 0.5). Only times recorded during the specific period should be considered.
 * To maximize map saturation, the rating system should encourage players to play maps that have a low record count.
+* Players have their own preferences in map styles, and the system should not grant more points solely based on completing a higher quantity of maps. Players should be able to win the season by participating in only the required number of maps.
 * For the season's final rating to be compatible with any future seasons, it is crucial to normalize the number of players, maps, and records.
 
-# Calculations
-WIP
+# Calculation overview
+Main components used to calculate final score:
+* **normalized_rank**: player’s time normalized from `<best_map_time, worst_map_time>` to `<1000, 0>`, calculated per player, per map
+* **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season>` to `<0, 1>`, calculated per player, per map
+* **base_score**: `normalized_rank * confidence_factor`, calculated per player, per map
+* **attendance_factor**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1, 0>`, calculated per map
+* **attendance_score**: `attendance_factor` normalized from `<1, 0>` to `<1000, 0>`, calculated per player, per map
+* **avg_base_score**: `base_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
+* **avg_attendance_score**: `attendance_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
+* **final_score**: if player completed minimum require number of maps it is `avg_base_score + avg_attendance_score`, otherwise: `0`, calculated per player
 
 # Sample Implementation
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
