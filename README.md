@@ -6,13 +6,16 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 * Time-based games typically operate as "infinite games," allowing continual access to maps throughout the game's lifespan and enabling ongoing alterations to leaderboards.
 
 # QuickQuack Key Principles
-* The rating system should be designed around seasons and a predefined map pool for each respective season (no seasonal, long-term approach is also possible, check below).
+* The rating system should be designed around seasons and a predefined map pool for each respective season (this is to address challenges listed above).
+* Individual player skill rating should always be relative to all other players participating in a given season.
 * Seasons should have a relatively short duration, allowing even casual players to actively participate from start to finish (e.g., 2 weeks).
 * The map pool should encompass maps that test a variety of skills. Additionally, the pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., the number of days in a season multiplied by 1.5).
 * To receive a rating for the current season, players must successfully complete a specified number of maps from the pool within a designated time frame (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
 * To maximize map saturation, the rating system should encourage players to play maps that have a low record count.
 * Players have their own preferences in map styles, and the system should not grant more points solely based on completing a higher quantity of maps. Players should be able to win the season by participating in only the required number of maps.
-* For the season's final rating to be compatible with any future seasons, it is crucial to normalize the number of players, maps, and records.
+* For the season's final rating to be compatible with any future seasons, it is important to normalize the number of players, maps, and records.
+
+If you need "no seasonal approach" check section "How to make it work outside defined seasons".
 
 # Calculation Overview
 Main components used to calculate final score:
