@@ -1,11 +1,12 @@
-# QuickQuack [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**NOTICE**
+QuickQuack is in the development phase and some key principles and / or calculations may change as I am atill testing some ideas.
 
-# Overview
+# QuickQuack [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for time-based games, such as racing games, where players strive to achieve the fastest completion times on various maps. It addresses key challenges commonly encountered in such games:
 * Many time-based games feature a large number of maps, ranging from hundreds to thousands. This can result in situations where a map lacks sufficient "saturation" to provide a balanced rating for players who complete it. Factors contributing to this lack of "saturation" may include a low player base, the map's lack of popularity, or its high level of difficulty, making successful completion a significant challenge.
 * Time-based games typically operate as "infinite games," allowing continual access to maps throughout the game's lifespan and enabling ongoing alterations to leaderboards.
 
-# QuickQuack Key Principles
+# Key Principles
 * The rating system should be designed around seasons and a predefined map pool for each respective season (this is to address challenges listed above).
 * Individual player skill rating should always be relative to all other players participating in a given season.
 * Seasons should have a relatively short duration, allowing even casual players to actively participate from start to finish (e.g., 2 weeks).
@@ -32,13 +33,13 @@ Main components used to calculate final score:
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
 While there is some boilerplate code, those interested in understanding the QuickQuack implementation can begin by reviewing the `add_record` method. 
 In addition, there are methods to dump and load JSON files, making it easy to inspect numbers in the database.
-There is also a `populate_database` method designed to simulate "real-world" data, although it is an big approximation. This simulation involves randomly setting parameters such as:
+There is also a `populate_database` method designed to simulate "real-world" data, although it is an big approximation. This simulation involves randomly set parameters such as:
 * Map popularity
 * Absolute player skill
 * Player skill uncertainty
 * Player number of tries for each map
 
-This approach allows for the comparison of "expected results" with the "actual results" produced by QuickQuack. Following several tests, I can confirmed that QuickQuack is indeed working and yields the intended outcomes. 😄
+This approach allows for the comparison of "expected results" with the "actual results" produced by QuickQuack. Following several tests, I can confirmed that QuickQuack is indeed working and yields the intended outcomes 😄.
 
 To test that script simply run `python main.py`.
 
