@@ -21,13 +21,12 @@ If you need "no seasonal approach" check section "How to make it work outside de
 # Calculation Overview
 Main components used to calculate final score:
 * **normalized_rank**: player’s time normalized from `<best_map_time, worst_map_time>` to `<1000, 0>`, calculated per player, per map
-* **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season> - 1` to `<0, 1>`, calculated per player, per map
+* **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season - 1>` to `<0, 1>`, calculated per player, per map
 * **base_score**: `normalized_rank * confidence_factor`, calculated per player, per map
-* **attendance_factor**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1, 0>`, calculated per map
-* **attendance_score**: `attendance_factor` normalized from `<1, 0>` to `<1000, 0>`, calculated per player, per map
-* **avg_base_score**: `base_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
-* **avg_attendance_score**: `attendance_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
-* **final_score**: if player completed minimum require number of maps it is `avg_base_score + avg_attendance_score`, otherwise: `0`, calculated per player
+* **attendance_score**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1000, 0>`, calculated per map
+* **map_score**: `base_score + attendance_score` 
+* **avg_map_score**: `map_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
+* **final_score**: if player completed minimum require number of maps it is `avg_map_score` otherwise: `0`, calculated per player
 
 # Sample Implementation
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
