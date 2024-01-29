@@ -42,22 +42,22 @@ flowchart TD
 Notes:
 1. **Total season participators** represents how many players completed at least one map from season's map pool. From now on lets abbreviate it to `total_participators`.
 2. Player must complete at least some amount of maps before getting season rating. Lets call this number a `map_required`.
-3. This algorithm uses normalization in a form of remapping value from one range to another. In further description I will use remapping "function" with such signature:
+3. This algorithm uses normalization in a form of remapping value from one range to another. In further description I will use remapping function with such signature:
 ```python
 remap(value_to_remap, input_range_start, input_range_stop, output_range_start, output_range_stop)
 ```
 
 ### Normalized rank
-The normalized ranking offers a richer set of information compared to the traditional ranking. While the classical ranking focuses solely on the order of sorted records, the normalized ranking goes further by conveying the actual differences between the times (map records).
+The normalized ranking offers a richer set of information compared to the traditional ranking. While the classical ranking focuses solely on the order of sorted records, the normalized ranking goes further by conveying the actual differences between times (map records).
 
 ```python
 normalized_rank = remap(player_time_on_map, best_map_time, worst_map_time, 1000, 0)
 ```
 
 ### Confidence factor
-The confidence factor reflects how a specific time on a map is 'good' compared to other times. If there is only one record on a map, there is no competition, and in such a case, no points are awarded. This is balanced out by the `attendance_score` component.
+The confidence factor reflects how a specific time on a map is 'good' compared to other times. If there is only one record on a map, there is no competition, and in such a case, no points are awarded. This is balanced out by the `attendance_score` component described later.
 
-To calculate confidence factor Im using number representing how many another records given record defeated, or in another words "number of opponents behind". 
+This component is calculated from number of records given record defeated, or in another words "number of opponents behind". 
 ```python
 confidence_factor = remap(num_opponents_behind, 0, total_participators - 1, 0, 1)
 ```
@@ -70,9 +70,9 @@ base_score = normalized_rank * confidence_factor
 ### Attendance score  
 This component serves two primary objectives:
 1. Levels the base score if it is low due to a limited number of records on a given map.
-2. Motivates players to engage with maps having a low record count, addressing the "saturation" issue.
+2. Motivates players to play maps with low record count, addressing the "saturation" issue.
 
-It's important to note that this is unrelated to the `base_score`, and all players on a given map will receive the same amount of `attendance_score`.
+It's important to note that this is unrelated to the `base_score` and all players on a given map will receive the same amount of `attendance_score`.
 ```python
 attendance_score = remap(total_num_records_on_map, 1, total_participators, 1000, 0)
 ```
@@ -83,9 +83,9 @@ map_score = base_score + attendance_score
 ```
 
 ### Average map score
-Average map score is calculated only from best `map_required` maps. So after each new record done by a player, list of all `map_scores` is sorted and only best are taken to calculate average.
+Average map score is calculated only from `map_required` maps on which player performed the best. So after each new record done by a player, list with every `map_score` done by a player is sorted and only best are taken to calculate an average.
 
-This is to prevent players from avoiding playing more maps than required in fear of lowering their final_score.
+This is to prevent players from avoiding playing more maps than required in fear of lowering their `final_score`.
 ```python
 avg_map_score = sum_of_best_map_scores / map_required
 ```
@@ -103,7 +103,7 @@ else:
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
 While there is some boilerplate code, those interested in understanding the QuickQuack implementation can begin by reviewing the `add_record` method. 
 In addition, there are methods to dump and load JSON files, making it easy to inspect numbers in the database.
-There is also a `populate_database` method designed to simulate "real-world" data, although it is an big approximation. This simulation involves randomly set parameters such as:
+There is also a `populate_database` method designed to simulate "real-world" data, although it is a big approximation. This simulation involves randomly set parameters such as:
 * Map popularity
 * Absolute player skill
 * Player skill uncertainty
