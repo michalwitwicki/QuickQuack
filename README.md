@@ -20,7 +20,28 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 
 If you need "no seasonal approach" check section "How to make it work outside defined seasons".
 
-# Calculation Overview
+# Calculations
+The QuickQuack algorithm is fairly straightforward and can be explained in a few steps, each outlining the calculations behind one of its key components.
+
+Flowchart with simplified steps to grasp the overall concept:
+```mermaid
+flowchart TD
+  NR[Normalized rank]
+  CF[Confidence factor]
+  BS[Base score]
+  AS[Map attendance score]
+  MP1[Map1 score]
+  MP2[Map2 score]
+  MP3[Map3 score]
+  AMP[Avg map score]
+  FS[Final score]
+  MUL(Multiply)
+  ADD(Add)
+  NR & CF --> MUL --> BS
+  AS & BS --> ADD --> MP1
+  MP1 & MP2 & MP3 --> AMP --> FS
+```
+
 Main components used to calculate final score:
 * **normalized_rank**: player’s time normalized from `<best_map_time, worst_map_time>` to `<1000, 0>`, calculated per player, per map
 * **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season - 1>` to `<0, 1>`, calculated per player, per map
