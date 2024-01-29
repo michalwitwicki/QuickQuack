@@ -317,7 +317,8 @@ class QuickQuackDatabase:
 
     def print_leader_board(self):
         print(f"\nLeader board:")
-        sorted_players = sorted(self.players.items(), key=lambda x: x[1][K_FINAL_SCORE], reverse=True)
+        filtered_players = {player_id: data for player_id, data in self.players.items() if data[K_MAP_PARTICIPATION_COUNT] > 0}
+        sorted_players = sorted(filtered_players.items(), key=lambda x: x[1][K_FINAL_SCORE], reverse=True)
 
         # Print header
         print(f"{'ID': <4}  {'Player ID': <11}{K_MAP_PARTICIPATION_COUNT: <25}{K_AVG_RANK: <10}{K_AVG_NORM_RANK: <15}"
@@ -434,7 +435,6 @@ if __name__ == "__main__":
     game_db = QuickQuackDatabase(num_maps=3, num_players=5)
     # game_db.print_map_time_table("Map1")
     # game_db.print_player_time_table("Player1")
-    game_db.print_leader_board()
 
     # game_db = QuickQuackDatabase(auto_populate=False)
     # game_db.add_map("M1")
@@ -445,4 +445,5 @@ if __name__ == "__main__":
     # game_db.add_record("M1", "P2", 20)
     # game_db.add_record("M2", "P1", 10)
 
+    game_db.print_leader_board()
     game_db.dump_to_json("db.json")
