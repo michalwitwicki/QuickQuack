@@ -1,4 +1,5 @@
-**NOTICE**
+**NOTICE** 
+
 QuickQuack is in the development phase and some key principles and / or calculations may change as I am atill testing some ideas.
 
 # QuickQuack [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -53,4 +54,4 @@ In order to implement the system outside defined seasons, a straightforward appr
 I would recommend avoiding the use of just one long-term rating. Perhaps a good solution would be to have two ratings: the first being short-term and accurate, and the second being long-term and approximate. The long-term rating can be calculated using the above approach or simply be the average of all (or just the latest) short-term ratings.
 
 # License
-[MIT](License)
+[MIT](LICENSE)
