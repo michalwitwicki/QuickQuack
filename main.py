@@ -229,13 +229,14 @@ class QuickQuackDatabase:
             self.players[player_id][K_AVG_NORM_RANK] = avg_norm_rank
 
     def __update_players_stats(self):
+        min_map_participation = int(self.MIN_PCT_MAP_PARTICIPATION * self.metadata[K_TOTAL_MAP_COUNT] + 0.5) # round up
 
         for p_id, data in self.players.items():
             total_maps = 0
             total_confidence_factor = 0
             total_base_score = 0
             total_attendance_score = 0
-            total_map_score = 0
+            total_maps_scores = []
             final_score = 0
 
             for m_id, records in self.records.items():
@@ -244,7 +245,7 @@ class QuickQuackDatabase:
                     total_confidence_factor += records[p_id][K_CONFIDENCE_FACTOR]
                     total_base_score += records[p_id][K_BASE_SCORE]
                     total_attendance_score += records[p_id][K_ATTENDANCE_SCORE]
-                    total_map_score += records[p_id][K_MAP_SCORE]
+                    total_maps_scores.append(records[p_id][K_MAP_SCORE])
 
             if total_maps == 0:
                 continue
@@ -252,10 +253,14 @@ class QuickQuackDatabase:
                 avg_confidence_factor = round(total_confidence_factor / total_maps, 3)
                 avg_base_score = round(total_base_score / total_maps, 3)
                 avg_attendance_score = round(total_attendance_score / total_maps, 3)
-                avg_map_score = round(total_map_score / total_maps, 3)
+
+                # Calculate average of map scores but only from best perfomed maps
+                total_maps_scores.sort(reverse=True)
+                best_maps_scores = total_maps_scores[0 : min_map_participation]
+                avg_map_score = round(sum(best_maps_scores) / len(best_maps_scores), 3)
 
                 # Check if player completed minimal number of maps
-                if self.players[p_id][K_MAP_PARTICIPATION_COUNT] >= self.MIN_PCT_MAP_PARTICIPATION * self.metadata[K_TOTAL_MAP_COUNT]:
+                if self.players[p_id][K_MAP_PARTICIPATION_COUNT] >= min_map_participation:
                     final_score = avg_map_score
                 else:
                     final_score = 0

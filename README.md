@@ -48,7 +48,7 @@ Main components used to calculate final score:
 * **base_score**: `normalized_rank * confidence_factor`, calculated per player, per map
 * **attendance_score**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1000, 0>`, calculated per map
 * **map_score**: `base_score + attendance_score`, calculated per player, per map
-* **avg_map_score**: `map_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
+* **avg_map_score**: `map_score_sum_from_best_maps_player_finished / minimum_require_number_of_maps`, calculated per player
 * **final_score**: if player completed minimum require number of maps it is `avg_map_score` otherwise: `0`, calculated per player
 
 # Sample Implementation
