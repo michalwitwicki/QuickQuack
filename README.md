@@ -1,7 +1,3 @@
-**NOTICE** 
-
-QuickQuack is in the development phase and some key principles and / or calculations may change as I am atill testing some ideas.
-
 # QuickQuack [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for time-based games, such as racing games, where players strive to achieve the fastest completion times on various maps. It addresses key challenges commonly encountered in such games:
 * Many time-based games feature a large number of maps, ranging from hundreds to thousands. This can result in situations where a map lacks sufficient "saturation" to provide a balanced rating for players who complete it. Factors contributing to this lack of "saturation" may include a low player base, the map's lack of popularity, or its high level of difficulty, making successful completion a significant challenge.
@@ -12,7 +8,7 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 * Individual player skill rating should always be relative to all other players participating in a given season.
 * Seasons should have a relatively short duration, allowing even casual players to actively participate from start to finish (e.g., 2 weeks).
 * The map pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., number of maps same as number of days in a season). Additionally, the map pool should encompass maps that test a variety of skills.
-* To receive a rating for the given season, players must successfully complete a specified number of maps from the pool (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
+* To receive a rating for the given season, players must successfully complete a minimal number of maps from the pool (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
 * Players should not avoid playing more maps than the required minimum out of fear of lowering their final score.
 * To maximize map saturation, the rating system should encourage players to play maps that have a low record count. It's worth noting here that map saturation is achieved when players try to complete it, even if ultimately they won't have any record on it.
 * If a player has sufficient skill, they should be able to win the season by participating in only the required number of maps. The system should not award more points simply because a player completed additional maps.
@@ -42,14 +38,66 @@ flowchart TD
   MP1 & MP2 & MP3 --> AMP --> FS
 ```
 
-Main components used to calculate final score:
-* **normalized_rank**: player’s time normalized from `<best_map_time, worst_map_time>` to `<1000, 0>`, calculated per player, per map
-* **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season - 1>` to `<0, 1>`, calculated per player, per map
-* **base_score**: `normalized_rank * confidence_factor`, calculated per player, per map
-* **attendance_score**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1000, 0>`, calculated per map
-* **map_score**: `base_score + attendance_score`, calculated per player, per map
-* **avg_map_score**: `map_score_sum_from_best_maps_player_finished / minimum_require_number_of_maps`, calculated per player
-* **final_score**: if player completed minimum require number of maps it is `avg_map_score` otherwise: `0`, calculated per player
+## Components used to calculate final score:
+Notes:
+1. **Total season participators** represents how many players completed at least one map from season's map pool. From now on lets abbreviate it to `total_participators`.
+2. Player must complete at least some amount of maps before getting season rating. Lets call this number a `map_required`.
+3. This algorithm uses normalization in a form of remapping value from one range to another. In further description I will use remapping "function" with such signature:
+```python
+remap(value_to_remap, input_range_start, input_range_stop, output_range_start, output_range_stop)
+```
+
+### Normalized rank
+The normalized ranking offers a richer set of information compared to the traditional ranking. While the classical ranking focuses solely on the order of sorted records, the normalized ranking goes further by conveying the actual differences between the times (map records).
+
+```python
+normalized_rank = remap(player_time_on_map, best_map_time, worst_map_time, 1000, 0)
+```
+
+### Confidence factor
+The confidence factor reflects how a specific time on a map is 'good' compared to other times. If there is only one record on a map, there is no competition, and in such a case, no points are awarded. This is balanced out by the `attendance_score` component.
+
+To calculate confidence factor Im using number representing how many another records given record defeated, or in another words "number of opponents behind". 
+```python
+confidence_factor = remap(num_opponents_behind, 0, total_participators - 1, 0, 1)
+```
+
+### Base score
+```python
+base_score = normalized_rank * confidence_factor
+```
+
+### Attendance score  
+This component serves two primary objectives:
+1. Levels the base score if it is low due to a limited number of records on a given map.
+2. Motivates players to engage with maps having a low record count, addressing the "saturation" issue.
+
+It's important to note that this is unrelated to the `base_score`, and all players on a given map will receive the same amount of `attendance_score`.
+```python
+attendance_score = remap(total_num_records_on_map, 1, total_participators, 1000, 0)
+```
+
+### Map score
+```python
+map_score = base_score + attendance_score
+```
+
+### Average map score
+Average map score is calculated only from best `map_required` maps. So after each new record done by a player, list of all `map_scores` is sorted and only best are taken to calculate average.
+
+This is to prevent players from avoiding playing more maps than required in fear of lowering their final_score.
+```python
+avg_map_score = sum_of_best_map_scores / map_required
+```
+
+### Final score
+If player has records on at least `map_required` maps then it is `avg_map_score`, otherwise: `0`.
+```python
+if player_number_of_records >= map_required:
+  final_score = avg_map_score
+else:
+  final_score = 0
+```
 
 # Sample Implementation
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
