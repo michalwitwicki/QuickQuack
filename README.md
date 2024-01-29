@@ -11,10 +11,11 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 * The rating system should be designed around seasons and a predefined map pool for each respective season (this is to address challenges listed above).
 * Individual player skill rating should always be relative to all other players participating in a given season.
 * Seasons should have a relatively short duration, allowing even casual players to actively participate from start to finish (e.g., 2 weeks).
-* The map pool should encompass maps that test a variety of skills. Additionally, the pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., the number of days in a season multiplied by 1.5).
-* To receive a rating for the current season, players must successfully complete a specified number of maps from the pool within a designated time frame (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
-* To maximize map saturation, the rating system should encourage players to play maps that have a low record count.
-* Players have their own preferences in map styles, and the system should not grant more points solely based on completing a higher quantity of maps. Players should be able to win the season by participating in only the required number of maps.
+* The map pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., number of maps same as number of days in a season). Additionally, the map pool should encompass maps that test a variety of skills.
+* To receive a rating for the given season, players must successfully complete a specified number of maps from the pool (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
+* Players should not avoid playing more maps than the required minimum out of fear of lowering their final score.
+* To maximize map saturation, the rating system should encourage players to play maps that have a low record count. It's worth noting here that map saturation is achieved when players try to complete it, even if ultimately they won't have any record on it.
+* If a player has sufficient skill, they should be able to win the season by participating in only the required number of maps. The system should not award more points simply because a player completed additional maps.
 * For the season's final rating to be compatible with any future seasons, it is important to normalize the number of players, maps, and records.
 
 If you need "no seasonal approach" check section "How to make it work outside defined seasons".
@@ -25,7 +26,7 @@ Main components used to calculate final score:
 * **confidence_factor**:  number of opponents behind on given map normalized from `<0, total_participating_players_count_in_whole_season - 1>` to `<0, 1>`, calculated per player, per map
 * **base_score**: `normalized_rank * confidence_factor`, calculated per player, per map
 * **attendance_score**: total number of records on given map normalized from `<1, total_participating_players_count_in_whole_season>` to `<1000, 0>`, calculated per map
-* **map_score**: `base_score + attendance_score` 
+* **map_score**: `base_score + attendance_score`, calculated per player, per map
 * **avg_map_score**: `map_score_sum_from_all_maps_player_finished / number_of_all_maps_player_finished`, calculated per player
 * **final_score**: if player completed minimum require number of maps it is `avg_map_score` otherwise: `0`, calculated per player
 
@@ -49,7 +50,7 @@ To test that script simply run `python main.py`.
 * Historical season results should be easily accessible, everyone loves statistics!
 
 # How to make it work outside defined seasons
-In order to implement the system outside defined seasons, a straightforward approach is to assign each player their individual map pool, consisting of the X number of maps where the player performed the best. However, it's important to note that calculating skill ratings across thousands of maps, over an infinite time period, and with numerous inactive players will result in less accuracy compared to restricting the system to specific defined values.
+In order to implement the system outside defined seasons, a straightforward approach is to assign each player their individual map pool, consisting of the X number of maps where the player performed the best (of course, there will be other adjustments to make). However, it's important to note that calculating skill ratings across thousands of maps, over an infinite time period, and with numerous inactive players will result in less accuracy compared to restricting the system to specific defined values and active players only.
 
 I would recommend avoiding the use of just one long-term rating. Perhaps a good solution would be to have two ratings: the first being short-term and accurate, and the second being long-term and approximate. The long-term rating can be calculated using the above approach or simply be the average of all (or just the latest) short-term ratings.
 
