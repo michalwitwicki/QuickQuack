@@ -1,18 +1,17 @@
 # QuickQuack [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for time-based games, such as racing games, where players strive to achieve the fastest completion times on various maps. It addresses key challenges commonly encountered in such games:
 * Many time-based games feature a large number of maps, ranging from hundreds to thousands. This can result in situations where a map lacks sufficient "saturation" to provide a balanced rating for players who complete it. Factors contributing to this lack of "saturation" may include a low player base, the map's lack of popularity, or its high level of difficulty, making successful completion a significant challenge.
-* Time-based games typically operate as "infinite games," allowing continual access to maps throughout the game's lifespan and enabling ongoing alterations to leaderboards.
+* Time-based games are typically an "infinite games", meaning that maps can be accessed throughout the game's lifespan, enabling ongoing alterations to leaderboards.
 
 # Key Principles
-* The rating system should be designed around seasons and a predefined map pool for each respective season (this is to address challenges listed above).
-* Individual player skill rating should always be relative to all other players participating in a given season.
-* Seasons should have a relatively short duration, allowing even casual players to actively participate from start to finish (e.g., 2 weeks).
-* The map pool should not be overly extensive to ensure that even casual players can engage with all the maps within the given time period (e.g., number of maps same as number of days in a season). Additionally, the map pool should encompass maps that test a variety of skills.
-* To receive a rating for the given season, players must successfully complete a minimal number of maps from the pool (e.g., the number of maps in the pool multiplied by 0.5). Times recorded outside given season time frame should not be considered.
+* The rating system should be designed with a focus on seasons, each having its own set of predetermined map pool. Trying to calculate skill ratings for the entire game history, considering every record and every player, won't yield accurate results. The seasonal approach limits calculations to specific timeframes and map selections, making them more "locally" accurate. This principle directly addresses the challenges mentioned above.
+* Every season should start as a clean slate. Maps should not have any existing records on them and players ratings from previous seasons should not be relevant.
+* The map pool should be a subset of all maps available in game. It can be either handpicked, semi-random, or chosen through community votes. It could also include new maps, specifically released for a particular season.
+* The duration of the season and the size of the map pool should be coordinated to ensure that even casual players can attempt every map. For example, 30 days and 20 maps.
+* To receive a rating for the given season, players must successfully complete a minimal number of maps from the pool (e.g. if map pool size is 20, then minimum number of maps to complete can be 10).
 * Players should not avoid playing more maps than the required minimum out of fear of lowering their final score.
 * To maximize map saturation, the rating system should encourage players to play maps that have a low record count. It's worth noting here that map saturation is achieved when players try to complete it, even if ultimately they won't have any record on it.
 * If a player has sufficient skill, they should be able to win the season by participating in only the required number of maps. The system should not award more points simply because a player completed additional maps.
-* For the season's final rating to be compatible with any future seasons, it is important to normalize the number of players, maps, and records.
 
 If you need "no seasonal approach" check section "How to make it work outside defined seasons".
 
@@ -91,6 +90,7 @@ avg_map_score = sum_of_best_map_scores / map_required
 ```
 
 ### Final score
+This is the final skill measure and should be used to create season's leader board.
 If player has records on at least `map_required` maps then it is `avg_map_score`, otherwise: `0`.
 ```python
 if player_number_of_records >= map_required:
@@ -98,6 +98,11 @@ if player_number_of_records >= map_required:
 else:
   final_score = 0
 ```
+
+# Potential Drawbacks
+1. Whenever a new player joins the season, we need to redo all the calculations for every record on every map and update the stats for each player. Additionally, player stats must be recalculated whenever a new record is set on a map in which the player participated. Without proper optimization, this could be computationally intensive. But there's a simple solution - instead of running calculations every time there's a new player or record, do it, for example, once every 10 minutes; super up-to-date stats are not critical.
+2. Final score has reachable upper bound (1000 with settings described in "calculation" section). It is very uncommon though.
+3. It's possible for two players to have the exact same final score. However, the probability of this happening is extremely low, and it decreases even further with more players, maps, and records.
 
 # Sample Implementation
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
@@ -114,7 +119,6 @@ This approach allows for the comparison of "expected results" with the "actual r
 To test that script simply run `python main.py`.
 
 # Additional Ideas
-* The map pool selection can be customized, either handpicked, semi-random, or chosen through community votes. It could also include new maps specifically released for a particular season.
 * At the conclusion of each season, players could be awarded "badges" for achieving specific milestones, such as securing 1st, 2nd, and 3rd place on individual maps and on final leaderboard. An additional achievement might be earned for recording a time on every map in the pool. Many other achievements could be explored. The key aspect is visibility of those badges, they should be displayed in a player's profile as attractive graphical icons, serving as strong motivation to participate in the season.
 * Historical season results should be easily accessible, everyone loves statistics!
 
