@@ -1,19 +1,34 @@
 # QuickQuack [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for time-based games, such as racing games, where players strive to achieve the fastest completion times on various maps. It addresses key challenges commonly encountered in such games:
-* Many time-based games feature a large number of maps, ranging from hundreds to thousands. This can result in situations where a map lacks sufficient "saturation" to provide a balanced rating for players who complete it. Factors contributing to this lack of "saturation" may include a low player base, the map's lack of popularity, or its high level of difficulty, making successful completion a significant challenge.
-* Time-based games are typically an "infinite games", meaning that maps can be accessed throughout the game's lifespan, enabling ongoing alterations to leaderboards.
+The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for time-based games, such as racing games, where players strive to achieve the fastest completion times on various maps or tracks.
+
+Time-based games like racing games pose unique challenges in rating calculations compared to more common competitive games such as chess or MOBA games. In these games, there are finite "matches" where results cannot be altered after they are completed. However, in racing games, maps are typically accessible throughout the lifespan of the game, allowing for the setting of new records.
+
+Another distinction is that players in racing games are not directly competing with each other; instead, they are competing against the map itself, and the winner is the one who completes it most effectively. Therefore, to measure a player's skill against a given map, we need to understand its relative difficulty and quality, which requires a substantial number of players attempting the map. The more players attempt a map, the more "saturated" it becomes. It's also worth highlighting that even attempting a map, without necessarily completing it, contributes to its saturation, particularly if the map is exceedingly challenging.
+
+Furthermore, racing games often feature numerous maps, ranging from hundreds to thousands. Ensuring proper saturation for all of them is likely impossible due to several reasons:
+  - Low player base
+  - Fluctuations in the player base over time, leading to changes in overall "player skill"
+  - Not all maps are equally popular or joyfull to play
+  - Some maps may be too difficult to complete even once
+  - Player preferences for longer or shorter maps, or maps that test specific skill sets
+  - New players are more inclined to play newer maps rather than older ones
+
+So, how does QuickQuack attempt to address these challenges? In short, through seasonal rotations with predetermined map pools. The seasonal approach restricts calculations to specific timeframes and map selections, enhancing their "local" accuracy. Additionally, players like competitions, and seasons with fixed map selections encourage them to play those maps, resulting in proper map saturation.
+
+For more details check "Key Principles" section.
+If you don't want to use the seasonal approach, refer to the section "How to make it work outside defined seasons."
 
 # Key Principles
-* The rating system should be designed with a focus on seasons, each having its own set of predetermined map pool. Trying to calculate skill ratings for the entire game history, considering every record and every player, won't yield accurate results. The seasonal approach limits calculations to specific timeframes and map selections, making them more "locally" accurate. This principle directly addresses the challenges mentioned above.
-* Every season should start as a clean slate. Maps selected for given season should be traeated as without. any existing records on them and players ratings from previous seasons should not be relevant.
+Here are key principles and ideas QuickQuack was designed around:
+
+* Every season should start as a clean slate. Maps selected for given season should be traeated as without any existing records on them (but of course top, rank 1 time for given map should be saved in some global timetable).
+* Players ratings from previous seasons should not be relevant.
 * The season's map pool should be a subset of all maps available in game. Maps for a pool can be either handpicked, semi-random, or chosen through community votes. Pool could also include new maps, specifically released for a particular season.
 * The duration of the season and the size of the map pool should be coordinated to ensure that even casual players can attempt every map. For example, 30 days and 20 maps.
 * To receive a rating for the given season, players must successfully complete a minimal number of maps from the pool (e.g. if map pool size is 20, then minimum number of maps to complete can be 10).
 * Players should not avoid playing more maps than the required minimum out of fear of lowering their final score.
-* To maximize map saturation, the rating system should encourage players to play maps that have a low record count. It's worth noting here that map saturation is achieved when players try to complete it, even if ultimately they won't have any record on it.
+* To maximize map saturation, the rating system should encourage players to play maps that have a low record count.
 * If a player has sufficient skill, they should be able to win the season by participating in only the required number of maps. The system should not award more points simply because a player completed additional maps.
-
-If you need "no seasonal approach" check section "How to make it work outside defined seasons".
 
 # Calculations
 The QuickQuack algorithm is fairly straightforward and can be explained in a few steps, each outlining the calculations behind one of its key components.
