@@ -119,6 +119,18 @@ else:
 2. Final score has reachable upper bound (1000 with settings described in "calculation" section). It is very uncommon though.
 3. It's possible for two players to have the exact same final score. However, the probability of this happening is extremely low, and it decreases even further with more players, maps, and records.
 
+# How to implement QuickQuack into your game?
+To seamlessly integrate the QuickQuack skill rating system into your game, follow these minimal required steps:
+
+1. **Define Season Duration and Rest Days**: Determine the duration of each season and decide if there will be any "rest days" between consecutive seasons.
+2. **Establish Map Pool Size**: Decide on the size of the map pool to be featured in each season.
+3. **Set Minimum Number of Maps for Rating**: Determine the minimum number of maps a player must complete to receive a rating at the end of the season.
+4. **Select Maps for Seasonal Map Pool**: Choose the maps to include in the map pool for each season, ensuring diversity and challenge.
+5. **Integrate QuickQuack Algorithm**: Implement the QuickQuack algorithm into your game system.
+6. **Provide Leaderboard Access**: Create a means for players to access both overall and map-specific leaderboards, allowing them to track their progress and compare their performance with others.
+
+While these steps represent the essential foundation for implementing QuickQuack, there's plenty of room for further enhancements and adjustments. Explore the "Additional Ideas" and "How to Make It Work Outside Defined Seasons" sections for additional inspiration and customization options.
+
 # Sample Implementation
 This repository includes a proof-of-concept sample implementation of the system. It is important to note that this implementation is heavily unoptimized and should not be utilized in a production environment.
 While there is some boilerplate code, those interested in understanding the QuickQuack implementation can begin by reviewing the `add_record` method. 
