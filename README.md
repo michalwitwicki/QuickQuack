@@ -5,17 +5,16 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 
 Time-based games like racing games pose unique challenges in rating calculations compared to more common competitive games such as chess or MOBA games. In these games, there are finite "matches" where results cannot be altered after they are completed. However, in racing games, maps are typically accessible throughout the lifespan of the game, allowing for the setting of new records.
 
-Another distinction is that players in racing games are not directly competing with each other; instead, they are competing against the map itself, and the winner is the one who completes it most effectively. Therefore, to measure a player's skill against a given map, we need to understand its relative difficulty and quality, which requires a substantial number of players attempting the map. The more players attempt a map, the more "saturated" it becomes. It's also worth highlighting that even attempting a map, without necessarily completing it, contributes to its saturation, particularly if the map is exceedingly challenging.
+Another distinction is that players in racing games are not directly competing with each other; instead, they are competing against the map itself, and the winner is the one who completes it most effectively. Therefore, to measure a player's skill against a given map, we need to understand its relative difficulty and quality, which requires a substantial number of players attempting the map. The more players attempt a map, the more "saturated" it becomes. It's also worth highlighting that even attempting a map, without necessarily completing it, contributes to its saturation, particularly if the map is hard to just finish it.
 
 Furthermore, racing games often feature numerous maps, ranging from hundreds to thousands. Ensuring proper saturation for all of them is likely impossible due to several reasons:
-  - Low player base
   - Fluctuations in the player base over time, leading to changes in overall "player skill"
   - Not all maps are equally popular or joyfull to play
   - Some maps may be too difficult to complete even once
   - Player preferences for longer or shorter maps, or maps that test specific skill sets
   - New players are more inclined to play newer maps rather than older ones
 
-So, how does QuickQuack attempt to address these challenges? In short, through seasonal rotations with predetermined map pools. The seasonal approach restricts calculations to specific timeframes and map selections, enhancing their "local" accuracy. Additionally, players like competitions, and seasons with fixed map selections encourage them to play those maps, resulting in proper map saturation.
+So, how does QuickQuack attempt to address these challenges? In short, through seasonal rotations with predetermined map pools. The seasonal approach restricts calculations to specific timeframes and map selections, enhancing their "local" accuracy. Additionally, players like competitions, and seasons with fixed map selections encourage them to play those maps, resulting in better map saturation.
 
 For more details check "Key Principles" section.
 If you don't want to use the seasonal approach, refer to the section "How to make it work outside defined seasons."
@@ -58,7 +57,7 @@ flowchart TD
 Notes:
 1. **Total season participators** represents how many players completed at least one map from season's map pool. From now on lets abbreviate it to `total_participators`.
 2. Player must complete at least some amount of maps before getting season rating. Lets call this number a `map_required`.
-3. This algorithm uses normalization in a form of remapping value from one range to another. In further description I will use remapping function with such signature:
+3. This algorithm uses normalization in a form of linear remapping value from one range to another. In further description I will use remapping function with such signature:
 ```python
 remap(value_to_remap, input_range_start, input_range_stop, output_range_start, output_range_stop)
 ```
@@ -74,6 +73,7 @@ normalized_rank = remap(player_time_on_map, best_map_time, worst_map_time, 1000,
 The confidence factor reflects how a specific time on a map is 'good' compared to other times. If there is only one record on a map, there is no competition, and in such a case, no points are awarded. This is balanced out by the `attendance_score` component described later.
 
 This component is calculated from number of records given record defeated, or in another words "number of opponents behind". 
+The more "opponents behind", the higher the `confidence_factor`.
 ```python
 confidence_factor = remap(num_opponents_behind, 0, total_participators - 1, 0, 1)
 ```
@@ -89,6 +89,7 @@ This component serves two primary objectives:
 2. Motivates players to play maps with low record count, addressing the "saturation" issue.
 
 It's important to note that this is unrelated to the `base_score` and all players on a given map will receive the same amount of `attendance_score`.
+The more records a map has, the lower its `attendance_score`.
 ```python
 attendance_score = remap(total_num_records_on_map, 1, total_participators, 1000, 0)
 ```
