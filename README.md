@@ -148,6 +148,10 @@ To test that script simply run `python main.py`.
 # Additional Ideas
 * At the conclusion of each season, players could be awarded "badges" for achieving specific milestones, such as securing 1st, 2nd, and 3rd place on individual maps and on final leaderboard. An additional achievement might be earned for recording a time on every map in the pool. Many other achievements could be explored. The key aspect is visibility of those badges, they should be displayed in a player's profile as attractive graphical icons, serving as strong motivation to participate in the season.
 * Historical season results should be easily accessible, everyone loves statistics!
+* If your game consists of various skill sets, and maps might only test a subset of those skills, you might want to split rankings to represent this. Adjusting QuickQuack for this is straightforward:
+  1. Define a list of possible "skills."
+  2. Assign appropriate skills to each map.
+  3. In addition to calculating the "average map score," calculate the "average <skill> score" for each defined skill.
 
 # How to make it work outside defined seasons
 In order to implement the system outside defined seasons, a straightforward approach is to assign each player their individual map pool, consisting of the X number of maps where the player performed the best (of course, there will be other adjustments to make). However, it's important to note that calculating skill ratings across thousands of maps, over an infinite time period, and with numerous inactive players will result in less accuracy compared to restricting the system to specific defined values and active players only.
