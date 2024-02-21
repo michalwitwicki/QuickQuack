@@ -5,8 +5,8 @@ The ~~Fast Duck~~ QuickQuack skill rating system is specifically designed for ti
 
 # Key Principles
 * The rating system should be designed with a focus on seasons, each having its own set of predetermined map pool. Trying to calculate skill ratings for the entire game history, considering every record and every player, won't yield accurate results. The seasonal approach limits calculations to specific timeframes and map selections, making them more "locally" accurate. This principle directly addresses the challenges mentioned above.
-* Every season should start as a clean slate. Maps should not have any existing records on them and players ratings from previous seasons should not be relevant.
-* The map pool should be a subset of all maps available in game. It can be either handpicked, semi-random, or chosen through community votes. It could also include new maps, specifically released for a particular season.
+* Every season should start as a clean slate. Maps selected for given season should be traeated as without. any existing records on them and players ratings from previous seasons should not be relevant.
+* The season's map pool should be a subset of all maps available in game. Maps for a pool can be either handpicked, semi-random, or chosen through community votes. Pool could also include new maps, specifically released for a particular season.
 * The duration of the season and the size of the map pool should be coordinated to ensure that even casual players can attempt every map. For example, 30 days and 20 maps.
 * To receive a rating for the given season, players must successfully complete a minimal number of maps from the pool (e.g. if map pool size is 20, then minimum number of maps to complete can be 10).
 * Players should not avoid playing more maps than the required minimum out of fear of lowering their final score.
